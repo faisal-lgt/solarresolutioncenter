@@ -14,12 +14,13 @@ export async function proxy(request: NextRequest) {
     await connectToDB();
     const lastRedirect = await Redirect.findOne().sort({ createdAt: -1 });
 
-    const destinations = list.filter(isDestinationOnline).filter(destination => {
+    const onlineDestination = list.filter(isDestinationOnline);
+    const destinations = onlineDestination.filter(destination => {
         if (!lastRedirect) return true;
         return destination.name !== lastRedirect.name;
     });
 
-    const [destination] = destinations;
+    const [destination] = destinations.length ? destinations : onlineDestination;
     const { name, url, params = {} } = destination;
 
     const destinationURL = new URL(url + search);
